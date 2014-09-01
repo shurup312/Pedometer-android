@@ -7,8 +7,8 @@ public class SensorData {
     public static float[] magnetData = new float[3];     // данные геомагнитного датчика
     public static float[] orientationData = new float[3];// амтрица положения в пространстве
     public static float resultGravity;
-    public static float[] arrayGravity = new float[801];
-    public static float[] averageGravity = new float[801];
+    public static float[] arrayGravity = new float[40];
+    public static float[] averageGravity = new float[40];
 
 
 }

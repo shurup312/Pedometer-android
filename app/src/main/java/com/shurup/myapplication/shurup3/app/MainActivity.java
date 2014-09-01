@@ -1,33 +1,84 @@
 package com.shurup.myapplication.shurup3.app;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.shurup.myapplication.shurup3.app.SensorData.*;
 
 public class MainActivity extends Activity {
     private SensorManager sensorManager;
-    private DrawView view;
     int iterator = 0;
     private FileSave SD;
     private int i;
 
+    Boolean recordSD = false;
+    private Date date;
+    private TextView tvText;
+    private Button buttonGo;
+    private TextView textGo;
+    private TextView delayText;
+    private int delay;
+    private Timer timer;
+    private boolean RUN;
+
+    public void setGo(View v){
+        textGo.setText("Go");
+        date = new Date();
+    }
+    public void setRun(View v){
+        textGo.setText("Run");
+        date = new Date();
+    }
+    public void setStairsUp(View v){
+        textGo.setText("StairsUp");
+        date = new Date();
+    }
+    public void setStairsDown(View v){
+        textGo.setText("StairsDown");
+        date = new Date();
+    }
+    public void setDefault(View v){
+        textGo.setText("Default");
+        date = new Date();
+    }
+    public void setSleep(View v){
+        textGo.setText("Sleep");
+        date = new Date();
+    }
+
+    public void setStop(View v){
+        sensorManager.unregisterListener(listener);
+        timer.cancel();
+        RUN = false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        view = new DrawView(this);
-        setContentView(view);
+        setContentView(R.layout.activity_main);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         setTimer();
         SD = new FileSave();
+        date = new Date();
+        tvText = (TextView) findViewById(R.id.tvText);
+        buttonGo = (Button)findViewById(R.id.Go);
+        textGo = (TextView)findViewById(R.id.textGo);
+        delayText = (TextView) findViewById(R.id.delayText);
+        tvText.setTextSize(12);
+        textGo.setText("Default");
     }
 
     /**
@@ -54,6 +105,11 @@ public class MainActivity extends Activity {
         timer.schedule(task, 0, 25);
     }
 
+    private String getCurrentTime() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
+        return dateFormat.format(date).toString();
+    }
+
     void showInfo() {
         SensorManager.getRotationMatrix(rotationMatrix, null, gravityData, magnetData);
         SensorManager.getOrientation(rotationMatrix, orientationData);
@@ -70,18 +126,27 @@ public class MainActivity extends Activity {
 
         }
         iterator++;
-        if(iterator==362){
+        if(iterator==40){
             StringBuffer sb = new StringBuffer();
             sb.setLength(0);
-            for(iterator=0;iterator<362;iterator++){
-                sb.append("{gravity:\"").append(arrayGravity[iterator]).append("\",averageGravity:\"").append(averageGravity[iterator]).append("\"},");
+            for(iterator=0;iterator<40;iterator++){
+                sb
+                        .append("{gr:\"")
+                        .append(arrayGravity[iterator])
+                        .append("\",avgGr:\"")
+                        .append(averageGravity[iterator])
+                        .append("\",rawGrX:\"")
+                        .append(accelData[0])
+                        .append("\",rawGrY:\"")
+                        .append(accelData[1])
+                        .append("\",rawGrZ:\"")
+                        .append(accelData[2])
+                        .append("\"},");
             }
-            SD.save("gravAverage","gravAverage.txt",sb);
+            SD.save((String) textGo.getText(),getCurrentTime()+".txt",sb);
             iterator = 0;
-            arrayGravity = new float[801];
-            arrayGravity = new float[801];
-        } else if(iterator%25==0){
-            view.invalidate();
+            arrayGravity = new float[40];
+            averageGravity = new float[40];
         }
     }
 
