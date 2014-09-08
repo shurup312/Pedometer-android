@@ -22,8 +22,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/textGo"
             android:layout_below="@+id/button3"
-            android:layout_toRightOf="@+id/delayText" android:layout_alignRight="@+id/button3"
-            android:layout_alignEnd="@+id/button3"/>
+            android:layout_alignRight="@+id/button3"
+            android:layout_alignEnd="@+id/button3" android:layout_alignLeft="@+id/button2"/>
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,46 +46,6 @@
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="100"
-            android:id="@+id/button4" android:layout_alignParentBottom="true" android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" android:layout_marginBottom="90dp" android:longClickable="false"
-            android:onClick="set100"/>
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:id="@+id/delayText"
-            android:layout_alignBottom="@+id/button4"
-            android:layout_alignLeft="@+id/button2" android:layout_alignStart="@+id/button2"
-            android:layout_toLeftOf="@+id/button4"/>
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="200"
-            android:id="@+id/button5" android:layout_below="@+id/delayText" android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" android:onClick="set200"/>
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="400"
-            android:id="@+id/button6" android:layout_below="@+id/button5" android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" android:onClick="set400"/>
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/power" android:layout_above="@+id/button5"/>
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="STOP"
-            android:id="@+id/button7"
-            android:clickable="true" android:layout_centerVertical="true" android:layout_alignRight="@+id/button2"
-            android:layout_alignEnd="@+id/button2"
-            android:layout_alignLeft="@+id/button3" android:layout_alignStart="@+id/button3"
-            android:onClick="setStop"/>
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:text="Default"
             android:id="@+id/button8" android:layout_above="@+id/button" android:layout_toLeftOf="@+id/Go"
             android:onClick="setDefault"/>
@@ -98,7 +58,21 @@
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/Math" android:layout_toRightOf="@+id/power"
-            android:layout_above="@+id/button4" android:layout_toLeftOf="@+id/button8"
-            android:layout_below="@+id/button7" android:linksClickable="true"/>
+            android:id="@+id/Math"
+            android:layout_toLeftOf="@+id/button8"
+            android:linksClickable="true" android:layout_centerVertical="true"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start"
+            android:id="@+id/start"
+            android:layout_below="@+id/textGo" android:layout_alignRight="@+id/textGo"
+            android:layout_alignEnd="@+id/textGo" android:layout_marginTop="43dp" android:onClick="start"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Stop"
+            android:id="@+id/stop"
+            android:layout_alignTop="@+id/start" android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" android:visibility="invisible" android:onClick="stop"/>
 </RelativeLayout>

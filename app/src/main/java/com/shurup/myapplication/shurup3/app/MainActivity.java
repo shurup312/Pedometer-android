@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,50 +20,87 @@ import java.util.TimerTask;
 import static com.shurup.myapplication.shurup3.app.SensorData.*;
 
 public class MainActivity extends Activity {
+    /**
+     * Сенсор менеджер
+     */
     private SensorManager sensorManager;
-    int iterator = 0;
+    /**
+     * переменная для объекта сохранения в файл
+     */
     private FileSave SD;
-    private int i;
-
-    Boolean recordSD = false;
+    /**
+     * Записывать ли на SD флэху
+     */
+    Boolean recordSD = true ;
+    /**
+     * Дата для имени создаваемого файла
+     */
     private Date date;
-    private TextView tvText;
-    private Button buttonGo;
+    /**
+     * Данные о состоянии сенсоров
+     */
     private TextView textGo;
-    private TextView delayText;
-    private int delay;
-    private Timer timer;
-    private boolean RUN;
+    /**
+     * Итератор
+     */
+    private int iterator;
+    /**
+     * Флаг запуска записи данных с сенсоров в файл
+     */
+    private boolean run = false;
+    /**
+     * Режим записи
+     */
+    private String mode;
 
-    public void setGo(View v){
-        textGo.setText("Go");
+    public void start(View v){
+        run = true;
+        Button start = (Button) findViewById(R.id.start);
+        Button stop = (Button) findViewById(R.id.stop);
+        start.setVisibility(View.INVISIBLE);
+        stop.setVisibility(View.VISIBLE);
+        Toast toast = Toast.makeText(getApplicationContext(),"Старт", Toast.LENGTH_SHORT);
+        toast.show();
+    }
+    public void stop(View v){
+        run = false;
+        Button start = (Button) findViewById(R.id.start);
+        Button stop = (Button) findViewById(R.id.stop);
+        start.setVisibility(View.VISIBLE);
+        stop.setVisibility(View.INVISIBLE);
+        SensorData.reset();
+        Toast toast = Toast.makeText(getApplicationContext(),"Стоп", Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
+
+    private void setMode(String modeName){
+        mode = modeName;
+        textGo.setText(mode);
         date = new Date();
+    }
+
+    /**
+     * Кнопки в интерфейсе для переключения режимов работы программы.
+     */
+    public void setGo(View v){
+        setMode("Go");
     }
     public void setRun(View v){
-        textGo.setText("Run");
-        date = new Date();
+        setMode("Run");
     }
     public void setStairsUp(View v){
-        textGo.setText("StairsUp");
-        date = new Date();
+        setMode("StairsUp");
     }
     public void setStairsDown(View v){
-        textGo.setText("StairsDown");
-        date = new Date();
+        setMode("StairsDown");
     }
     public void setDefault(View v){
-        textGo.setText("Default");
-        date = new Date();
+        setMode("Default");
     }
     public void setSleep(View v){
-        textGo.setText("Sleep");
-        date = new Date();
-    }
+        setMode("Sleep");
 
-    public void setStop(View v){
-        sensorManager.unregisterListener(listener);
-        timer.cancel();
-        RUN = false;
     }
 
     @Override
@@ -70,25 +108,44 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        /**
+         * Запускаем таймер
+         */
         setTimer();
+        /**
+         * Создаем объект для записи в файл
+         */
         SD = new FileSave();
+        /**
+         * Задаем дефолтую дату для именования файла с записанными данными.
+         */
         date = new Date();
-        tvText = (TextView) findViewById(R.id.tvText);
-        buttonGo = (Button)findViewById(R.id.Go);
-        textGo = (TextView)findViewById(R.id.textGo);
-        delayText = (TextView) findViewById(R.id.delayText);
+        /**
+         * Элемент для вывода данных в программе.
+         */
+        TextView tvText = (TextView) findViewById(R.id.tvText);
         tvText.setTextSize(12);
-        textGo.setText("Default");
+        /**
+         * Элемент для вывода режима записи.
+         */
+        textGo = (TextView)findViewById(R.id.textGo);
+        setMode("Default");
     }
 
     /**
      * Создание/обновление таймера.
      */
     private void setTimer() {
+        /**
+         * Инициализация опроса сенсоров
+         */
         sensorManager.registerListener(listener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(listener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(listener, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST);
 
+        /**
+         * Запуск таймера событий.
+         */
         Timer timer = new Timer();
         TimerTask task = new TimerTask() {
             @Override
@@ -96,60 +153,69 @@ public class MainActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        showInfo();
+                        /**
+                         * Если стоит флаг, что надо калькулировать, то делаем это.
+                         */
+                        if(run){
+                            showInfo();
+                        }
 
                     }
                 });
             }
         };
+        /**
+         * Опрос каждые 25мс и выполнение таски.
+         */
         timer.schedule(task, 0, 25);
     }
 
+    /**
+     * Садание формата названия файла
+     */
     private String getCurrentTime() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
-        return dateFormat.format(date).toString();
+        return dateFormat.format(date);
     }
 
+
     void showInfo() {
-        SensorManager.getRotationMatrix(rotationMatrix, null, gravityData, magnetData);
-        SensorManager.getOrientation(rotationMatrix, orientationData);
-
-        resultGravity = accelData[0] * rotationMatrix[8] + accelData[1] * rotationMatrix[9] + accelData[2] * rotationMatrix[10];
-        arrayGravity[iterator] = resultGravity;
-        if(iterator>0){
-
-            if((Math.abs(arrayGravity[iterator-1])-Math.abs(arrayGravity[iterator]))<3){
-                averageGravity[iterator] = (arrayGravity[iterator-1]+0.1f*(arrayGravity[iterator]-arrayGravity[iterator-1]));
-            } else {
-                averageGravity[iterator] = arrayGravity[iterator];
-            }
-
-        }
-        iterator++;
-        if(iterator==40){
+        /**
+         * Калькуляция значения гравитации. Если вернется true (раз в 40 итераций), то надо сбросить данные на диск.
+         */
+        if(Calculate.calculate()){
             StringBuffer sb = new StringBuffer();
             sb.setLength(0);
             for(iterator=0;iterator<40;iterator++){
                 sb
-                        .append("{gr:\"")
+                        .append("{\"gr\":\"")
                         .append(arrayGravity[iterator])
-                        .append("\",avgGr:\"")
+                        .append("\",\"avgGr\":\"")
                         .append(averageGravity[iterator])
-                        .append("\",rawGrX:\"")
+                        .append("\",\"rawGrX\":\"")
                         .append(accelData[0])
-                        .append("\",rawGrY:\"")
+                        .append("\",\"rawGrY\":\"")
                         .append(accelData[1])
-                        .append("\",rawGrZ:\"")
+                        .append("\",\"rawGrZ\"  :\"")
                         .append(accelData[2])
                         .append("\"},");
             }
-            SD.save((String) textGo.getText(),getCurrentTime()+".txt",sb);
-            iterator = 0;
-            arrayGravity = new float[40];
-            averageGravity = new float[40];
+            /**
+             * Если есть в настройках указание сохранять на флэху, то сохраняем
+             */
+            if(recordSD){
+                SD.save(mode,getCurrentTime()+".txt",sb);
+            }
+            /**
+             * Скинем массив с данными.
+             */
+            SensorData.reset();
         }
     }
 
+    /**
+     * Опрос сенсоров
+     */
     SensorEventListener listener = new SensorEventListener() {
 
         @Override
@@ -158,6 +224,9 @@ public class MainActivity extends Activity {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
+            /**
+             * Запись данных от сенсоров в переменные.
+             */
             switch (event.sensor.getType()) {
                 case Sensor.TYPE_ACCELEROMETER:
                     accelData = event.values.clone();
@@ -173,3 +242,5 @@ public class MainActivity extends Activity {
     };
 
 }
+
+
